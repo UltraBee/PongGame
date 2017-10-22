@@ -29,6 +29,9 @@ let aiY = 200;
 const lineWidth = 4;
 const lineHeight = 16;
 
+let playerLives = 2;
+let livesStatus = 1;
+
 
 
 // --- Functions
@@ -55,7 +58,11 @@ function table() {
 
 function ball() {
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(ballX, ballY, ballSize, ballSize);
+//    ctx.fillRect(ballX, ballY, ballSize, ballSize);
+    ctx.beginPath();
+    ctx.arc(ballX + ballSize/2, ballY + ballSize/2, ballSize/2,0,2*Math.PI);
+    ctx.stroke();
+    ctx.fill();
     
     ballX += ballSpeedX;
     ballY += ballSpeedY;
@@ -64,7 +71,29 @@ function ball() {
         ballSpeedY = -ballSpeedY;
         speedUp();
     }
-    if(ballX <= 0 || ballX + ballSize >= cw) ballSpeedX = -ballSpeedX;
+    
+    // Win/Lost
+    if(ballX <= -ballSize || ballX >= cw) {
+        
+        
+        ctx.font = "25px Calibri";
+        ctx.textAlign="center";
+        ctx.fillText("Click mouse down to refresh", cw/2, ch/2 + 45);
+        
+        ballSpeedX = 0;
+        ballSpeedY = 0;
+        
+        $(canvas).on('click', function() {
+            document.location.reload();
+        });
+        
+        ctx.font = "45px Calibri";
+        if (ballX <= -ballSize) {
+            ctx.fillText("You lost", cw/2, ch/2);   
+                } else if (ballX >= cw) {
+                    ctx.fillText("You won", cw/2, ch/2);
+            }
+    } 
 }
 
 
@@ -81,6 +110,8 @@ function playerPosition(e) {
 }
 canvas.addEventListener('mousemove', playerPosition);
 
+
+// AI Position
 function aiPosition () {
     var middlePaddle = aiY + paddleHeight / 2;
     var middleBall = ballY + ballSize / 2;
@@ -89,13 +120,13 @@ function aiPosition () {
     // AI behaviour
     if(ballX > 500) {
         if(middlePaddle - middleBall > 200) {
-            aiY -= 20;
+            aiY -= 15;
         } else if(middlePaddle - middleBall > 50) {
-            aiY -= 10;
+            aiY -= 7;
         } else if(middlePaddle - middleBall < -200) {
-            aiY += 20;
+            aiY += 15;
         } else if(middlePaddle - middleBall < -50) {
-            aiY += 10;
+            aiY += 7;
         }
     } else if (ballX <= 500 && ballX > 150) {
         if(middlePaddle - middleBall < 100) {
@@ -126,21 +157,29 @@ function speedUp() {
 function collisionDetection() {
     // Player
     if(ballX <= playerX + paddleWidth && ballY >= playerY && ballY <= playerY + paddleHeight) {
-        ballSpeedX = -ballSpeedX;
+           ballSpeedX = -ballSpeedX;  
     }
     // AI
-    if(ballX >= aiX - ballSize/2 && ballY + ballSize >= aiY && ballY <= aiY + paddleHeight) {
+    if(ballX >= aiX - ballSize && ballY + ballSize >= aiY && ballY <= aiY + paddleHeight) {
         ballSpeedX = -ballSpeedX;
     }
 }
+
+//function playerLivesCounter() {
+//    ctx.font = "25px Arial";
+//    ctx.textAlign = "left";
+//    ctx.fillText("Lives: "+playerLives, 50, 20);
+//}
 
 function game() {
 table()
 ball()
 player()
 ai()
+//playerLivesCounter()
 aiPosition()
 collisionDetection()
+    
 }
 
-setInterval(game, 10)
+    setInterval(game, 10)
